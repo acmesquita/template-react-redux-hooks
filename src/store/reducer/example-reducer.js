@@ -5,19 +5,39 @@ import { createActions, createReducer } from 'reduxsauce';
  *  Ex.: Type.ADD e add = { type: Type.ADD, params }
  */
 export const { Types, Creators } = createActions({
-  add: ["title"]
+  add: ["note"],
+  remove: ["id"],
+  edit: ["data"]
 })
 
 const INITIAL_STATE = {
-  data: [
-    'React Native',
-    'ReactJS',
-    'NodeJS'
-  ]
+  data: JSON.parse(localStorage.getItem('list')) || []
 }
 
 const add = (state = INITIAL_STATE, action) => {
-  return { ...state, data: [ ...state.data, action.title ]}
+  let newData = [...state.data, action.note]
+  localStorage.clear()
+  localStorage.setItem('list', JSON.stringify(newData))
+  return { ...state, data: newData }
+}
+
+const remove = (state = INITIAL_STATE, action) => {
+  let newData = state.data.filter(note => note.id !== action.id)
+  localStorage.clear()
+  localStorage.setItem('list', JSON.stringify(newData))
+  return { ...state, data: newData }
+}
+
+const edit = (state = INITIAL_STATE, action) => {
+  let newData = state.data.map(note => {
+    if (action.data.id === note.id) {
+      note.text = action.data.newText
+    }
+    return note
+  })
+  localStorage.clear()
+  localStorage.setItem('list', JSON.stringify(newData))
+  return { ...state, data: newData }
 }
 
 /**
@@ -31,4 +51,6 @@ const add = (state = INITIAL_STATE, action) => {
 
 export default createReducer(INITIAL_STATE, {
   [Types.ADD]: add,
+  [Types.REMOVE]: remove,
+  [Types.EDIT]: edit
 })
